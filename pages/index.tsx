@@ -1,11 +1,12 @@
-import { Alignment, Button, HTMLTable, Navbar } from "@blueprintjs/core";
+import { HTMLTable } from "@blueprintjs/core";
 import axios from "axios";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import useSwr from "swr";
+import AppBar from "../components/appbar";
 import styles from "../styles/Home.module.css";
 
+// props: any is definitely best practices, dont @ me
 const Home: NextPage = (props: any) => {
   const { data, error } = useSwr(
     "https://ranked.ddns.net/api/top?limit=10",
@@ -24,16 +25,8 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <Navbar fixedToTop={true}>
-          <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading>Ranked</Navbar.Heading>
-            <Navbar.Divider />
-            <Button className="bp3-minimal" icon="home" text="Home" />
-            <Button className="bp3-minimal" icon="share" text="Discord" />
-          </Navbar.Group>
-        </Navbar>
-
-        <HTMLTable>
+        <AppBar />
+        <HTMLTable striped={true}>
           <thead>
             <tr>
               <th>Place</th>
@@ -50,6 +43,7 @@ const Home: NextPage = (props: any) => {
                 <td>{player.ratings["1v1"].rating}</td>
                 <td>
                   {(() => {
+                    // totally best practices
                     for (let i = 0; i < props.ranks.length; i++) {
                       if (
                         player.ratings["1v1"].rating < props.ranks[i].startsAt
@@ -64,7 +58,7 @@ const Home: NextPage = (props: any) => {
         </HTMLTable>
       </main>
 
-      <footer className={styles.footer}>
+      {/* <footer className={styles.footer}>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
           target="_blank"
@@ -75,7 +69,7 @@ const Home: NextPage = (props: any) => {
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
-      </footer>
+      </footer> */}
     </div>
   );
 };
