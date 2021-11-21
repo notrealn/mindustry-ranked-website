@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import useSwr from "swr";
 import AppBar from "../../components/appbar";
 import styles from "../../styles/Home.module.css";
+import { getNames } from "../../util";
 
 export default function Player() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function Player() {
 
   if (typeof id !== "string") return <div>Invalid id type</div>;
   if (error || matchError) return <div>Failed to load.</div>;
-  if (!data) return <div>Loading...</div>;
+  if (!data || !matchData) return <div>Loading...</div>;
 
   return (
     <div className={styles.container}>
@@ -48,7 +49,6 @@ export default function Player() {
               <th>MatchId</th>
               <th>Players</th>
               <th>Map</th>
-              <th>Result</th>
               <th>Rating</th>
               <th>Duration</th>
             </tr>
@@ -58,18 +58,16 @@ export default function Player() {
               return (
                 <tr key={index}>
                   <td>{match.match_id}</td>
-                  {/* BEST PRACTICES ONLY :) */}
-                  <td>
-                    {Object.entries(match.players)
-                      .map((player: any) => player[1].name)
-                      .join(", ")}
-                  </td>
+                  <td>{getNames(match.players)}</td>
                   <td>{match.map}</td>
-                  <td>
-                    {match.players[id].place === 1 ? "Victory" : "Defeat"}
-                  </td>
                   <td>{`${match.players[id].rating_before} → ${match.players[id].rating_after}`}</td>
-                  <td>{(match.finished_at - match.started_at) / 360000}</td>
+                  <td>
+                    {isNaN(match.finished_at)
+                      ? "Ongoing"
+                      : `${Math.round(
+                          (match.finished_at - match.started_at) / 60000
+                        )} minutes`}
+                  </td>
                 </tr>
               );
             })}

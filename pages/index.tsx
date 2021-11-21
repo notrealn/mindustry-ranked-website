@@ -2,19 +2,25 @@ import { HTMLTable } from "@blueprintjs/core";
 import axios from "axios";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import useSwr from "swr";
 import AppBar from "../components/appbar";
 import styles from "../styles/Home.module.css";
-
+import { formatName, getNames } from "../util";
 // props: any is definitely best practices, dont @ me
 const Home: NextPage = (props: any) => {
-  const { data, error } = useSwr(
+  const leaderboard = useSwr(
     "https://ranked.ddns.net/api/top?limit=10",
     fetcher
   );
+  const recentMatches = useSwr(
+    "https://ranked.ddns.net/api/matches?limit=10",
+    fetcher
+  );
 
-  if (error) return <div>Failed to load.</div>;
-  if (!data) return <div>Loading...</div>;
+  if (leaderboard.error || recentMatches.error)
+    return <div>Failed to load.</div>;
+  if (!leaderboard.data || !recentMatches.data) return <div>Loading...</div>;
 
   return (
     <div className={styles.container}>
@@ -26,6 +32,7 @@ const Home: NextPage = (props: any) => {
 
       <main className={styles.main}>
         <AppBar />
+        <h1>Top 10 Players</h1>
         <HTMLTable striped={true}>
           <thead>
             <tr>
@@ -36,10 +43,10 @@ const Home: NextPage = (props: any) => {
             </tr>
           </thead>
           <tbody>
-            {data.playerList.map((player: any, index: number) => (
-              <tr key={index}>
+            {leaderboard.data.playerList.map((player: any, index: number) => (
+              <tr key={player.player_id}>
                 <td>{index + 1}</td>
-                <td>{player.name}</td>
+                <td>{formatName(player.name, player.player_id)}</td>
                 <td>{player.ratings["1v1"].rating}</td>
                 <td>
                   {(() => {
@@ -51,6 +58,38 @@ const Home: NextPage = (props: any) => {
                         return props.ranks[i - 1]?.name;
                     }
                   })()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </HTMLTable>
+        <h1>Recent Games</h1>
+        <HTMLTable striped={true}>
+          <thead>
+            <tr>
+              <th>Match ID</th>
+              <th>Players</th>
+              <th>Map</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentMatches.data.matches.map((match: any) => (
+              <tr key={match.match_id}>
+                <td>
+                  <Link href={`/match/${match.match_id}`} passHref={true}>
+                    {/* it gets mad if i dont do this. */}
+                    {`${match.match_id}`}
+                  </Link>
+                </td>
+                <td>{getNames(match.players)}</td>
+                <td>{match.map}</td>
+                <td>
+                  {isNaN(match.finished_at)
+                    ? "Ongoing"
+                    : `${Math.round(
+                        (match.finished_at - match.started_at) / 60000
+                      )} minutes`}
                 </td>
               </tr>
             ))}
@@ -83,8 +122,5 @@ export const getStaticProps: GetStaticProps = () => {
       .then((res) => resolve({ props: { ranks: res.data } }));
   });
 };
-
-// export const getStaticProps: GetStaticProps = () =>
-//   axios.get("https://ranked.ddns.net/api/ranks").then((res) => res.data);
 
 export default Home;
