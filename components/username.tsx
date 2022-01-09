@@ -1,6 +1,6 @@
 import Link from "next/link";
 // i think using any is funny
-export function Username({ name, id, won }: any) {
+export default function Username({ name, id, won }: any) {
   return (
     <Link href={`/player/${id}`}>
       <a>

@@ -5,14 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import useSwr from "swr";
 import AppBar from "../../components/appbar";
-import { Namelist } from "../../components/namelist";
+import Namelist from "../../components/namelist";
 import styles from "../../styles/Home.module.css";
 
 export default function Player() {
   const router = useRouter();
   const { id } = router.query;
 
-  const playerData = useSwr(
+  const player = useSwr(
     `https://ranked.ddns.net/api/player?playerId=${id}`,
     (url: string) => axios.get(url).then((res) => res.data)
   );
@@ -23,8 +23,8 @@ export default function Player() {
   );
 
   if (typeof id !== "string" || isNaN(+id)) return <div>Invalid id type</div>;
-  if (playerData.error || match.error) return <div>Failed to load.</div>;
-  if (!playerData.data || !match.data) return <div>Loading...</div>;
+  if (player.error || match.error) return <div>Failed to load.</div>;
+  if (!player.data || !match.data) return <div>Loading...</div>;
 
   return (
     <div className={styles.container}>
@@ -36,12 +36,12 @@ export default function Player() {
 
       <main className={styles.main}>
         <AppBar />
-        <h1>{playerData.data.name.replaceAll(/\[[^\]]+]/g, "")}</h1>
-        Place on leaderboard: {playerData.data.place}
+        <h1>{player.data.name.replaceAll(/\[[^\]]+]/g, "")}</h1>
+        Place on leaderboard: {player.data.place}
         <br />
         Last connection:
         {` ${(
-          (Date.now() - playerData.data.last_connect_timestamp) /
+          (Date.now() - player.data.last_connect_timestamp) /
           3600000
         ).toFixed(1)}`}
         hours ago

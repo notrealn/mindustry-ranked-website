@@ -5,8 +5,8 @@ import Head from "next/head";
 import Link from "next/link";
 import useSwr from "swr";
 import AppBar from "../components/appbar";
-import { Namelist } from "../components/namelist";
-import { Username } from "../components/username";
+import Namelist from "../components/namelist";
+import Username from "../components/username";
 import styles from "../styles/Home.module.css";
 // props: any is definitely best practices, dont @ me
 const Home: NextPage = (props: any) => {

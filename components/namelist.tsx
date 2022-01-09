@@ -1,7 +1,7 @@
-import { Username } from "./username";
+import Username from "./username";
 // import styles from "../styles/Home.module.css";
 // wtf do i call this thing
-export function Namelist({ players }: any) {
+export default function Namelist({ players }: any) {
   return (
     <div>
       {Object.keys(players)
